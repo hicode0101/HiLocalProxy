@@ -15,6 +15,15 @@ func main() {
 
 	loadConfig()
 
+	socks5ProxyServer := &Socks5ProxyServer{
+		NeedAuth:   ServerConfig.NeedAuth,
+		UserName:   ServerConfig.UserName,
+		Password:   ServerConfig.Password,
+		ListenAddr: ServerConfig.Socks5ListenAddr,
+	}
+
+	go socks5ProxyServer.RunSocks5Proxy()
+
 	httpProxyServer := &HttpProxyServer{
 		CertFile:   "cert.pem",
 		KeyFile:    "key.pem",

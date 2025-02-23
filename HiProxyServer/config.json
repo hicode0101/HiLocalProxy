@@ -1,6 +1,6 @@
 {
   "AppName": "HiProxySerrver",
-  "NeedAuth": false,
+  "NeedAuth": true,
   "UserName": "hiproxy",
   "Password": "123456",
   "HttpListenAddr": ":8080",

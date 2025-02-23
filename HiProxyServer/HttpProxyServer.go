@@ -124,7 +124,7 @@ func (_self *HttpProxyServer) RunHttpProxy() {
 	server := &http.Server{
 		Addr: _self.ListenAddr,
 		Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			fmt.Println(GetCurrentTime(), " Proxy to：", r.RequestURI)
+			fmt.Println(GetCurrentTime(), " Http Proxy to：", r.RequestURI)
 			if r.Method == http.MethodConnect {
 				_self.handleHTTPS(w, r, _self.UserName, _self.Password)
 			} else {
@@ -133,7 +133,7 @@ func (_self *HttpProxyServer) RunHttpProxy() {
 		}),
 	}
 
-	log.Println("Starting proxy server on ", _self.ListenAddr)
+	log.Println("Starting Http Proxy server on ", _self.ListenAddr)
 
 	err := server.ListenAndServe()
 	if err != nil {
@@ -159,7 +159,7 @@ func (_self *HttpProxyServer) RunHttpsProxy() {
 			Certificates: []tls.Certificate{cert},
 		},
 		Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			fmt.Println(GetCurrentTime(), " Proxy to：", r.RequestURI)
+			fmt.Println(GetCurrentTime(), " Https Proxy to：", r.RequestURI)
 			if r.Method == http.MethodConnect {
 				_self.handleHTTPS(w, r, _self.UserName, _self.Password)
 			} else {
@@ -168,7 +168,7 @@ func (_self *HttpProxyServer) RunHttpsProxy() {
 		}),
 	}
 
-	log.Println("Starting proxy server on ", _self.ListenAddr)
+	log.Println("Starting Https Proxy server on ", _self.ListenAddr)
 
 	err = server.ListenAndServeTLS(_CertFile, _KeyFile)
 	if err != nil {

@@ -1,0 +1,7 @@
+{
+  "AppName": "HiLocalProxy",
+  "Socks5ListenAddr": ":10808",
+  "UpSocks5Server": "127.0.0.1:1080",
+  "UpUserName": "hiproxy",
+  "UpPassword": "123456"
+}
