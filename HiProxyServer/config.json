@@ -1,0 +1,8 @@
+{
+  "AppName": "HiProxySerrver",
+  "NeedAuth": false,
+  "UserName": "hiproxy",
+  "Password": "123456",
+  "HttpListenAddr": ":8080",
+  "Socks5ListenAddr": ":1080"
+}
