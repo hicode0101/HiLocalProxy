@@ -15,6 +15,10 @@ func main() {
 
 	loadConfig()
 
+	fmt.Println("--------------------------")
+	fmt.Println("HiProxyServer v1.0.0")
+	fmt.Println("--------------------------")
+
 	socks5ProxyServer := &Socks5ProxyServer{
 		NeedAuth:   ServerConfig.NeedAuth,
 		UserName:   ServerConfig.UserName,
