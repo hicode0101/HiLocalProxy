@@ -69,19 +69,19 @@ func (_self *Socks5ProxyServer) proxyHandler(conn net.Conn) {
 
 		//fmt.Println("读取到验证信息：", n, authBuf)
 
-		ver := uint8(authBuf[0])
+		//ver := uint8(authBuf[0])
 		uLen := uint8(authBuf[1])
 
-		fmt.Println("Auth ver：", ver, "uLen：", uLen, "authBuf：", authBuf)
+		//fmt.Println("Auth ver：", ver, "uLen：", uLen, "authBuf：", authBuf)
 
 		uname := string(authBuf[2 : 2+uLen])
 		pLen := uint8(authBuf[2+uLen])
 		pass := string(authBuf[2+1+uLen : 2+1+uLen+pLen])
 
-		fmt.Println("Request Auth u：", uname, " P：", pass)
+		//fmt.Println("Request Auth u：", uname, " P：", pass)
 		//校验用户名和密码
 		if _self.UserName == uname && _self.Password == pass {
-			fmt.Println("AUTH_SUCCESS")
+			//fmt.Println("AUTH_SUCCESS")
 			conn.Write(AUTH_SUCCESS)
 		} else {
 			//用户名密码不对，验证失败关闭连接
@@ -150,7 +150,7 @@ func (_self *Socks5ProxyServer) RunSocks5Proxy() {
 		log.Fatalf("Listen fail: %v", err)
 	}
 
-	log.Println("Starting Socks5 Proxy server on ", _self.ListenAddr)
+	fmt.Println("Starting Socks5 Proxy server on ", _self.ListenAddr)
 	for {
 		// 接受客户端连接
 		conn, err := listener.Accept()

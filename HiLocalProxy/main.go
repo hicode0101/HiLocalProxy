@@ -14,6 +14,10 @@ var (
 func main() {
 
 	loadConfig()
+
+	fmt.Println("HiLocalProxy")
+	fmt.Println("Forward to Upstream Socks5 proxy server：", ServerConfig.UpSocks5Server)
+
 	socks5UpProxy := &Socks5UpProxy{
 		ListenAddr: ServerConfig.Socks5ListenAddr,
 		UpServer:   ServerConfig.UpSocks5Server,

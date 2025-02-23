@@ -182,7 +182,7 @@ func (_self *Socks5UpProxy) RunSocks5Proxy() {
 		log.Fatalf("Listen fail: %v", err)
 	}
 
-	log.Println("Starting Socks5 Proxy server on ", _self.ListenAddr)
+	fmt.Println("Starting Socks5 Proxy server on ", _self.ListenAddr)
 	for {
 		// 接受客户端连接
 		conn, err := listener.Accept()

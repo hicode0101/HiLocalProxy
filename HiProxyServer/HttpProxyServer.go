@@ -133,7 +133,7 @@ func (_self *HttpProxyServer) RunHttpProxy() {
 		}),
 	}
 
-	log.Println("Starting Http Proxy server on ", _self.ListenAddr)
+	fmt.Println("Starting Http Proxy server on ", _self.ListenAddr)
 
 	err := server.ListenAndServe()
 	if err != nil {
