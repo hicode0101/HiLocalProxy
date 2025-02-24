@@ -16,7 +16,7 @@ func main() {
 	loadConfig()
 
 	fmt.Println("--------------------------")
-	fmt.Println("HiProxyServer v1.0.0")
+	fmt.Println("HiProxyServer v1.0.2")
 	fmt.Println("--------------------------")
 	fmt.Println("NeedAuth：", ServerConfig.NeedAuth)
 
