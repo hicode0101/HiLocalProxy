@@ -93,7 +93,7 @@ func (_self *Socks5ProxyServer) proxyHandler(conn net.Conn) {
 
 	}
 
-	b := make([]byte, 32)
+	b := make([]byte, 256)
 	n, err := conn.Read(b)
 	//fmt.Println(conn.RemoteAddr().String(), "len：", n, "reqBuf b：", b)
 
@@ -118,7 +118,7 @@ func (_self *Socks5ProxyServer) proxyHandler(conn net.Conn) {
 		network = "udp"
 	}
 	//reqServer, err := net.Dial(network, targetAddr)
-	reqServer, err := net.DialTimeout(network, targetAddr, 30*time.Second)
+	reqServer, err := net.DialTimeout(network, targetAddr, 60*time.Second)
 	if err != nil {
 		fmt.Println("reqServer err:", err)
 		return

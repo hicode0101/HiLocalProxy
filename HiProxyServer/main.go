@@ -18,6 +18,7 @@ func main() {
 	fmt.Println("--------------------------")
 	fmt.Println("HiProxyServer v1.0.0")
 	fmt.Println("--------------------------")
+	fmt.Println("NeedAuth：", ServerConfig.NeedAuth)
 
 	socks5ProxyServer := &Socks5ProxyServer{
 		NeedAuth:   ServerConfig.NeedAuth,
