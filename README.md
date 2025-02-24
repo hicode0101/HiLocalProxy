@@ -3,6 +3,9 @@
 
 Map the proxy service that needs to be verified to a local direct connection
 
+`工具在使用上有任何问题或需要帮助，可以加我的微信：hicode0101`
+
+
 # HiLocalProxy（本地代理）
 
 ```
@@ -11,6 +14,9 @@ Map the proxy service that needs to be verified to a local direct connection
 2、需要将上游socks5代理服务器的地址端口、用户名密码，正确配置到config.json文件中。
 
 ```
+    
+    
+    
 
 # HiProxyServer（代理服务器）
 
