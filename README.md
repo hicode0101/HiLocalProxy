@@ -32,7 +32,7 @@ Map the proxy service that needs to be verified to a local direct connection
 
 ## 作者申明
 
-本插件仅供白帽子安全研究和技术交流使用，禁止用于商业用途。
+本工具软件仅供白帽子安全研究和技术交流使用，禁止用于商业用途。
 
 🙋‍♀️我的白帽昵称：犀利的远哥
 
