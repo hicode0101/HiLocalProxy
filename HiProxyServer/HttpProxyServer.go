@@ -13,6 +13,21 @@ import (
 	"strings"
 )
 
+/*
+HTTPS 的自制网站证书生成
+
+openssl req -x509 -newkey rsa:2048 -keyout key.pem -out cert.pem -days 365 -nodes
+
+cert.pem 文件存储的是公钥信息，key.pem 文件存储的是私钥信息
+
+可以将 key.pem 和 cert.pem 部署到 nginx 上使用
+
+本地浏览器要信任该证书的话，需要导出 cer 文件，然后在客户机上导入该证书到信任证书区域。
+
+openssl x509 -outform der -in cert.pem -out proxy.cer
+
+在导出 .cer 文件时，应该使用 cert.pem 而不是 key.pem
+*/
 type HttpProxyServer struct {
 	ListenAddr string
 	CertFile   string
