@@ -11,12 +11,15 @@ var (
 	ServerConfig *Config
 )
 
+// AppVersion 版本号：必须与发布 tag（如 v1.0.3）保持一致，CI 在打 tag 时会校验
+var AppVersion = "v1.0.3"
+
 func main() {
 
 	loadConfig()
 
 	fmt.Println("--------------------------")
-	fmt.Println("HiLocalProxy v1.0.2")
+	fmt.Println("HiLocalProxy " + AppVersion)
 	fmt.Println("--------------------------")
 	fmt.Println("Forward to Upstream Socks5 proxy server：", ServerConfig.UpSocks5Server)
 
@@ -48,16 +51,18 @@ func FromJson(data []byte, t interface{}) error {
 }
 
 func loadConfig() {
-	//加载配置文件
+	//加载配置文件（程序从工作目录读取 ./config.json，因此必须在配置文件所在目录运行）
 	workPath, _ := os.Getwd()
 
 	configData, configErr := os.ReadFile(fmt.Sprint(workPath, "/config.json"))
 	if configErr != nil {
 		fmt.Println("Read config File err:", configErr)
-		return
+		os.Exit(1)
 	}
 
 	ServerConfig = new(Config)
-	FromJson(configData, ServerConfig)
-	//fmt.Println(AppConfigS.AppName)
+	if err := FromJson(configData, ServerConfig); err != nil {
+		fmt.Println("Parse config File err:", err)
+		os.Exit(1)
+	}
 }

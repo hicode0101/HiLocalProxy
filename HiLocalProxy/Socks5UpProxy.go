@@ -20,9 +20,7 @@ type Socks5UpProxy struct {
 func (_self *Socks5UpProxy) proxyHandler(conn net.Conn) {
 
 	headBuf := make([]byte, 2)
-	_, err := conn.Read(headBuf)
-
-	if err != nil {
+	if _, err := io.ReadFull(conn, headBuf); err != nil {
 		fmt.Println(conn.RemoteAddr().String(), " Read error: ", err)
 		return
 	}
@@ -38,14 +36,38 @@ func (_self *Socks5UpProxy) proxyHandler(conn net.Conn) {
 	nMethods := headBuf[1]
 	//METHODS
 	methods := make([]byte, nMethods)
-	if n, err := conn.Read(methods); n != int(nMethods) || err != nil {
+	if _, err := io.ReadFull(conn, methods); err != nil {
 		fmt.Println("Get methods error", err)
 		conn.Close()
 		return
 	}
 
-	//回复2个byte，表示 VER=0x05 METHOD=0x00
-	conn.Write([]byte{0x05, 0x00})
+	//按客户端提供的认证方法选择本地认证方式：优先无认证；仅提供用户名密码时也接受。
+	//本地凭据不做校验，真实的用户名密码认证发生在上游服务器
+	methodChosen := byte(0xFF)
+	for _, m := range methods {
+		if m == 0x00 {
+			methodChosen = 0x00
+			break
+		}
+		if m == 0x02 {
+			methodChosen = 0x02
+		}
+	}
+	if methodChosen == 0xFF {
+		conn.Write([]byte{0x05, 0xFF})
+		conn.Close()
+		return
+	}
+	conn.Write([]byte{0x05, methodChosen})
+
+	if methodChosen == 0x02 {
+		if err := _self.readDiscardLocalAuth(conn); err != nil {
+			fmt.Println("本地用户名密码子协商读取失败: ", err)
+			conn.Close()
+			return
+		}
+	}
 
 	// 连接到目标Socks5代理服务器
 	proxyConn, err := net.Dial("tcp", _self.UpServer)
@@ -78,6 +100,28 @@ func (_self *Socks5UpProxy) proxyHandler(conn net.Conn) {
 		proxyConn.Close()
 	}()
 
+}
+
+// readDiscardLocalAuth 读取并丢弃本地子协商的用户名密码（RFC 1929），本地不做校验
+func (_self *Socks5UpProxy) readDiscardLocalAuth(conn net.Conn) error {
+	head := make([]byte, 2) // VER ULEN
+	if _, err := io.ReadFull(conn, head); err != nil {
+		return err
+	}
+	uname := make([]byte, head[1])
+	if _, err := io.ReadFull(conn, uname); err != nil {
+		return err
+	}
+	plenBuf := make([]byte, 1)
+	if _, err := io.ReadFull(conn, plenBuf); err != nil {
+		return err
+	}
+	passwd := make([]byte, plenBuf[0])
+	if _, err := io.ReadFull(conn, passwd); err != nil {
+		return err
+	}
+	_, err := conn.Write([]byte{0x01, 0x00})
+	return err
 }
 
 func (_self *Socks5UpProxy) authenticateWithProxy(proxyConn net.Conn) error {
@@ -123,7 +167,8 @@ func (_self *Socks5UpProxy) authenticateWithProxy(proxyConn net.Conn) error {
 	if err != nil {
 		return err
 	}
-	if response[0] != 0x05 || response[1] != 0x00 {
+	// RFC 1929：用户名密码子协商响应的版本号为 0x01，STATUS=0x00 表示成功
+	if response[0] != 0x01 || response[1] != 0x00 {
 		return fmt.Errorf("Socks5 认证失败: %v", response)
 	}
 	return nil

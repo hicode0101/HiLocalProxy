@@ -1,0 +1,90 @@
+name: Release
+
+# 推送 v 开头的版本号 tag 时触发，例如 v1.0.3
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 安装 Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+
+      # 校验规则：
+      # 1. tag 必须为 vX.Y.Z 格式
+      # 2. tag 必须与 HiLocalProxy/main.go 中 AppVersion 输出的版本号完全一致
+      - name: 校验 tag 与代码输出版本号一致
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          CODE_VERSION="$(sed -n 's/^var AppVersion = "\(.*\)"$/\1/p' HiLocalProxy/main.go | head -n1)"
+
+          if [ -z "${CODE_VERSION}" ]; then
+            echo "::error title=版本号解析失败::无法从 HiLocalProxy/main.go 解析 AppVersion，请确认代码中存在：var AppVersion = \"vX.Y.Z\""
+            exit 1
+          fi
+
+          if ! echo "${TAG}" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "::error title=tag 格式错误::tag（${TAG}）必须为 vX.Y.Z 格式，例如 v1.0.3"
+            exit 1
+          fi
+
+          if [ "${TAG}" != "${CODE_VERSION}" ]; then
+            echo "::error title=版本号不一致::tag（${TAG}）与代码输出版本号（${CODE_VERSION}）不一致，请修改 HiLocalProxy/main.go 中的 AppVersion 后重新打 tag"
+            exit 1
+          fi
+
+          echo "版本校验通过：tag = 代码输出版本号 = ${TAG}"
+
+      # 交叉编译 Linux / Windows amd64，产物与 release_HiLocalProxy.sh 保持一致：
+      # HiLocalProxy-<os>-<arch>-<tag>.zip（二进制 + config.json）
+      - name: 构建 Linux / Windows 发布包
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          mkdir -p dist
+          build() {
+            GOOS="$1"; GOARCH="$2"; EXT="$3"
+            OUTDIR="HiLocalProxy-${GOOS}-${GOARCH}-${TAG}"
+            mkdir -p "${OUTDIR}"
+            ( cd HiLocalProxy && GOOS="${GOOS}" GOARCH="${GOARCH}" go build -trimpath -ldflags "-w -s" )
+            mv "HiLocalProxy/HiLocalProxy${EXT}" "${OUTDIR}/"
+            cp HiLocalProxy/config.json "${OUTDIR}/"
+            zip -r "dist/${OUTDIR}.zip" "${OUTDIR}"
+            rm -rf "${OUTDIR}"
+          }
+          build linux amd64 ""
+          build windows amd64 ".exe"
+
+      # 双保险：确认二进制中确实包含 tag 对应的版本号
+      - name: 校验构建产物中的版本号
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          mkdir -p verify
+          unzip -q "dist/HiLocalProxy-windows-amd64-${TAG}.zip" -d verify
+          if ! grep -aqF "${TAG}" "verify/HiLocalProxy-windows-amd64-${TAG}/HiLocalProxy.exe"; then
+            echo "::error title=产物版本校验失败::二进制中未找到版本号 ${TAG}"
+            exit 1
+          fi
+          echo "产物版本校验通过：HiLocalProxy ${TAG}"
+
+      - name: 创建 GitHub Release 并上传产物
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          gh release create "${TAG}" dist/*.zip \
+            --title "HiLocalProxy ${TAG}" \
+            --generate-notes
