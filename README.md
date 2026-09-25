@@ -3,10 +3,6 @@
 
 Map the proxy service that needs to be verified to a local direct connection
 
-`工具在使用上有任何问题或需要帮助，可以加我的微信：hicode0101`
-
-
-# HiLocalProxy（本地代理）
 
 ```
 1、将需要用户名和密码验证的socks5代理服务映射到本地，变成无需验证的代理服务。
@@ -15,7 +11,7 @@ Map the proxy service that needs to be verified to a local direct connection
 
 ```
     
-
+`工具在使用上有任何问题或需要帮助，可以加我的微信：hicode0101`
 
 
 ## 作者申明
