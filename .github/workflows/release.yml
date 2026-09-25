@@ -137,7 +137,14 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAG: ${{ github.ref_name }}
+          REPO: ${{ github.repository }}
         run: |
-          gh release create "${TAG}" dist/*.zip \
-            --title "HiLocalProxy ${TAG}" \
-            --generate-notes
+          # 本 job 未检出仓库（无 .git），必须用 -R 显式指定目标仓库
+          if gh release view "${TAG}" -R "${REPO}" > /dev/null 2>&1; then
+            echo "Release ${TAG} 已存在，仅覆盖上传产物（支持失败后重跑）"
+            gh release upload "${TAG}" dist/*.zip -R "${REPO}" --clobber
+          else
+            gh release create "${TAG}" dist/*.zip -R "${REPO}" \
+              --title "HiLocalProxy ${TAG}" \
+              --generate-notes
+          fi
