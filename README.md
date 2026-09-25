@@ -106,9 +106,17 @@ git push origin v1.0.3
 CI 会自动完成以下流程（见 [.github/workflows/release.yml](.github/workflows/release.yml)）：
 
 1. **版本号一致性校验**：tag 必须为 `vX.Y.Z` 格式，且与 `HiLocalProxy/main.go` 中 `AppVersion` 的值完全一致，否则构建失败并给出明确报错
-2. 交叉编译 Linux / Windows amd64 发布包（`-trimpath -ldflags "-w -s"`，与本地发布脚本一致）
-3. 校验构建产物中包含 tag 版本号
-4. 创建 GitHub Release，上传 `HiLocalProxy-<os>-<arch>-<tag>.zip`（内含二进制 + config.json）
+2. **四平台构建**（`-trimpath -ldflags "-w -s"`，产物校验通过后再打包）：
+
+   | 发布包 | 平台 | 构建方式 |
+   |--------|------|----------|
+   | `HiLocalProxy-linux-amd64-vX.Y.Z.zip` | Linux x86_64 | Ubuntu runner 上交叉编译 |
+   | `HiLocalProxy-windows-amd64-vX.Y.Z.zip` | Windows x86_64 | Ubuntu runner 上交叉编译 |
+   | `HiLocalProxy-macos-arm64-vX.Y.Z.zip` | macOS Apple Silicon (M 系列) | macOS ARM runner 上原生编译 |
+   | `HiLocalProxy-macos-amd64-vX.Y.Z.zip` | macOS Intel (x86_64) | **macOS ARM 平台上交叉编译** |
+
+3. 汇总 4 个发布包（每个内含二进制 + config.json）
+4. 创建 GitHub Release 并上传全部产物
 
 > ⚠️ 发版前请先同步修改 `HiLocalProxy/main.go` 中的 `AppVersion`，再打相同版本号的 tag。
 
